@@ -1,0 +1,782 @@
+<!DOCTYPE html>
+<html lang="fa" dir="rtl">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>ماشین حساب هوشمند پایه نهم</title>
+    <script src="https://cdn.plot.ly/plotly-latest.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/10.6.4/math.js"></script>
+    <link href="https://fonts.googleapis.com/css2?family=Amiri:wght@700&family=Vazirmatn:wght@400;700&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --primary-color: #5D9C9C;
+            --secondary-color: #8FB9B9;
+            --accent-color: #3D7A7A;
+            --light-color: #E0F2F2;
+            --dark-color: #2C5E5E;
+            --text-color: #2C3E50;
+            --header-footer: #3D7A7A;
+        }
+        
+        body {
+            font-family: 'Vazirmatn', sans-serif;
+            background: linear-gradient(135deg, #E0F2F2 0%, #D1E7E7 100%);
+            margin: 0;
+            padding: 0;
+            color: var(--text-color);
+            min-height: 100vh;
+            display: flex;
+            flex-direction: column;
+        }
+        
+        .header {
+            background-color: var(--header-footer);
+            color: white;
+            padding: 1rem;
+            text-align: center;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+            position: relative;
+            overflow: hidden;
+        }
+        
+        .header::before {
+            content: "";
+            position: absolute;
+            top: 0;
+            left: 0;
+            right: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #5D9C9C, #8FB9B9, #5D9C9C);
+        }
+        
+        .bismillah {
+            font-family: 'Amiri', serif;
+            font-size: 2.5rem;
+            margin: 0.5rem 0;
+            color: #FFFFFF;
+            text-shadow: 0 2px 4px rgba(0,0,0,0.2);
+        }
+        
+        .creators {
+            display: flex;
+            justify-content: center;
+            gap: 2rem;
+            margin-top: 1rem;
+            font-size: 1.1rem;
+            opacity: 0.9;
+        }
+        
+        .creator {
+            position: relative;
+            padding: 0.5rem 1rem;
+            background: rgba(255,255,255,0.2);
+            border-radius: 50px;
+            transition: all 0.3s ease;
+        }
+        
+        .creator:hover {
+            transform: translateY(-3px);
+            background: rgba(255,255,255,0.3);
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+        }
+        
+        .main-container {
+            flex: 1;
+            padding: 2rem;
+            max-width: 1200px;
+            margin: 0 auto;
+            width: 100%;
+        }
+        
+        .footer {
+            background-color: var(--header-footer);
+            color: white;
+            text-align: center;
+            padding: 1rem;
+            font-size: 0.9rem;
+            margin-top: auto;
+            border-top: 4px solid var(--secondary-color);
+        }
+        
+        .copyright {
+            font-family: 'Vazirmatn', sans-serif;
+            letter-spacing: 1px;
+            opacity: 0.8;
+        }
+        
+        .menu-btn {
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            padding: 1rem 1.5rem;
+            margin: 0.5rem;
+            border-radius: 8px;
+            font-size: 1.1rem;
+            cursor: pointer;
+            width: 220px;
+            text-align: center;
+            transition: all 0.3s ease;
+            box-shadow: 0 4px 8px rgba(0,0,0,0.1);
+            font-weight: 700;
+        }
+        
+        .menu-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+            box-shadow: 0 6px 12px rgba(0,0,0,0.15);
+        }
+        
+        .calculator {
+            background-color: white;
+            padding: 2rem;
+            border-radius: 12px;
+            box-shadow: 0 8px 24px rgba(0,0,0,0.08);
+            margin-top: 2rem;
+            border: 1px solid rgba(0,0,0,0.05);
+        }
+        
+        .calculator-display {
+            width: 100%;
+            padding: 1rem;
+            font-size: 1.5rem;
+            margin-bottom: 1rem;
+            text-align: right;
+            border: 2px solid var(--secondary-color);
+            border-radius: 8px;
+            font-family: 'Vazirmatn', sans-serif;
+            background-color: var(--light-color);
+        }
+        
+        .calculator-btn {
+            width: 60px;
+            height: 60px;
+            margin: 0.5rem;
+            font-size: 1.2rem;
+            background-color: var(--primary-color);
+            color: white;
+            border: none;
+            border-radius: 8px;
+            cursor: pointer;
+            transition: all 0.2s ease;
+            font-family: 'Vazirmatn', sans-serif;
+        }
+        
+        .calculator-btn:hover {
+            background-color: var(--accent-color);
+            transform: translateY(-2px);
+        }
+        
+        .info-panel {
+            background-color: var(--light-color);
+            color: var(--text-color);
+            padding: 1.5rem;
+            border-radius: 8px;
+            margin: 1rem 0;
+            border-right: 4px solid var(--primary-color);
+            display: none;
+        }
+        
+        .back-btn {
+            background-color: var(--dark-color);
+        }
+        
+        #graph {
+            width: 100%;
+            height: 500px;
+            background-color: white;
+            border-radius: 8px;
+            margin-top: 1rem;
+            box-shadow: 0 4px 12px rgba(0,0,0,0.05);
+        }
+        
+        .result-display {
+            margin-top: 1.5rem;
+            padding: 1.5rem;
+            background-color: var(--light-color);
+            border-radius: 8px;
+            font-size: 1.1rem;
+            line-height: 1.8;
+            white-space: pre-line;
+            border-left: 4px solid var(--primary-color);
+        }
+        
+        .section-title {
+            color: var(--accent-color);
+            font-size: 1.8rem;
+            margin-bottom: 1.5rem;
+            text-align: center;
+            position: relative;
+            padding-bottom: 0.5rem;
+        }
+        
+        .section-title::after {
+            content: "";
+            position: absolute;
+            bottom: 0;
+            left: 50%;
+            transform: translateX(-50%);
+            width: 100px;
+            height: 3px;
+            background: linear-gradient(90deg, var(--primary-color), var(--secondary-color));
+            border-radius: 3px;
+        }
+        
+        @media (max-width: 768px) {
+            .menu-btn {
+                width: 100%;
+                margin: 0.5rem 0;
+            }
+            
+            .calculator-btn {
+                width: 50px;
+                height: 50px;
+                font-size: 1rem;
+            }
+            
+            .bismillah {
+                font-size: 1.8rem;
+            }
+            
+            .creators {
+                flex-direction: column;
+                gap: 0.5rem;
+            }
+        }
+    </style>
+</head>
+<body>
+    <header class="header">
+        <div class="bismillah">بِسْمِ اللَّـهِ الرَّحْمَـٰنِ الرَّحِيمِ</div>
+        <div class="creators">
+            <div class="creator">ساخته شده توسط:</div>
+            <div class="creator">حمیدرضا موسی پسندی</div>
+            <div class="creator">مرتضی زارع مقدم</div>
+        </div>
+    </header>
+
+    <div class="main-container">
+        <div id="main-menu">
+            <h1 class="section-title">ماشین حساب هوشمند پایه نهم</h1>
+            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <button class="menu-btn" onclick="showCalculator('basic')">🧮 محاسبات عددی</button>
+                <button class="menu-btn" onclick="showCalculator('sets')">📦 عملیات مجموعه‌ای</button>
+                <button class="menu-btn" onclick="showCalculator('equation')">➗ حل معادله</button>
+                <button class="menu-btn" onclick="showCalculator('probability')">🎲 احتمال</button>
+                <button class="menu-btn" onclick="showCalculator('graph')">📈 نمودار تابع</button>
+            </div>
+        </div>
+
+        <!-- Basic Calculator -->
+        <div id="basic-calculator" class="calculator" style="display: none;">
+            <button class="menu-btn back-btn" onclick="showMainMenu()">🔙 بازگشت به منو</button>
+            <button class="menu-btn" onclick="toggleInfo('basic-info')">ℹ️ راهنمای محاسبات</button>
+            
+            <div id="basic-info" class="info-panel">
+                <h3>📚 محاسبات عددی:</h3>
+                <p>• جمع: 2+3=5</p>
+                <p>• تفریق: 5-2=3</p>
+                <p>• ضرب: 4*2=8</p>
+                <p>• تقسیم: 8/4=2</p>
+                <p>• توان: 2^3=8</p>
+                <p>• جذر: sqrt(9)=3</p>
+                <p>• عدد پی: π</p>
+                <p>• عدد نپر: e</p>
+            </div>
+            
+            <input type="text" id="basic-display" class="calculator-display" readonly>
+            
+            <div style="display: flex; flex-wrap: wrap; justify-content: center;">
+                <button class="calculator-btn" onclick="appendToDisplay('7')">7</button>
+                <button class="calculator-btn" onclick="appendToDisplay('8')">8</button>
+                <button class="calculator-btn" onclick="appendToDisplay('9')">9</button>
+                <button class="calculator-btn" onclick="appendToDisplay('+')">+</button>
+                <button class="calculator-btn" onclick="appendToDisplay('-')">-</button>
+                <button class="calculator-btn" onclick="clearDisplay()">C</button>
+                
+                <button class="calculator-btn" onclick="appendToDisplay('4')">4</button>
+                <button class="calculator-btn" onclick="appendToDisplay('5')">5</button>
+                <button class="calculator-btn" onclick="appendToDisplay('6')">6</button>
+                <button class="calculator-btn" onclick="appendToDisplay('*')">×</button>
+                <button class="calculator-btn" onclick="appendToDisplay('/')">÷</button>
+                <button class="calculator-btn" onclick="appendToDisplay('(')">(</button>
+                
+                <button class="calculator-btn" onclick="appendToDisplay('1')">1</button>
+                <button class="calculator-btn" onclick="appendToDisplay('2')">2</button>
+                <button class="calculator-btn" onclick="appendToDisplay('3')">3</button>
+                <button class="calculator-btn" onclick="appendToDisplay('^')">^</button>
+                <button class="calculator-btn" onclick="appendToDisplay('sqrt(')">√</button>
+                <button class="calculator-btn" onclick="appendToDisplay(')')">)</button>
+                
+                <button class="calculator-btn" onclick="appendToDisplay('0')">0</button>
+                <button class="calculator-btn" onclick="appendToDisplay('.')">.</button>
+                <button class="calculator-btn" onclick="appendToDisplay('pi')">π</button>
+                <button class="calculator-btn" onclick="appendToDisplay('e')">e</button>
+                <button class="calculator-btn" onclick="backspace()">⌫</button>
+                <button class="calculator-btn" onclick="calculate()" style="background-color: var(--accent-color);">=</button>
+            </div>
+        </div>
+
+        <!-- Set Operations -->
+        <div id="sets-calculator" class="calculator" style="display: none;">
+            <button class="menu-btn back-btn" onclick="showMainMenu()">🔙 بازگشت به منو</button>
+            <button class="menu-btn" onclick="toggleInfo('sets-info')">ℹ️ راهنمای مجموعه‌ها</button>
+            
+            <div id="sets-info" class="info-panel">
+                <h3>📚 عملیات مجموعه‌ای:</h3>
+                <p>• مجموعه: گروهی از اعداد مثل {1,2,3}</p>
+                <p>• اتحاد (A ∪ B): ترکیب دو مجموعه</p>
+                <p>• اشتراک (A ∩ B): عضوهای مشترک دو مجموعه</p>
+                <p>• تفاضل (A - B): اعضای A که در B نیستند</p>
+                <p>• مثال:</p>
+                <p>  A = {1,2,3}, B = {2,3,4}</p>
+                <p>  A ∪ B = {1,2,3,4}</p>
+                <p>  A ∩ B = {2,3}</p>
+                <p>  A - B = {1}</p>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">مجموعه A (مثال: 1,2,3)</label>
+                <input type="text" id="set-a" class="calculator-display" placeholder="اعداد را با کاما جدا کنید">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">مجموعه B (مثال: 2,3,4)</label>
+                <input type="text" id="set-b" class="calculator-display" placeholder="اعداد را با کاما جدا کنید">
+            </div>
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">عملیات:</label>
+                <select id="set-operation" class="calculator-display" style="width: 100%; padding: 1rem;">
+                    <option value="union">اتحاد (A ∪ B)</option>
+                    <option value="intersection">اشتراک (A ∩ B)</option>
+                    <option value="a-b">تفاضل (A - B)</option>
+                    <option value="b-a">تفاضل (B - A)</option>
+                </select>
+            </div>
+            <button class="menu-btn" onclick="calculateSets()" style="width: 100%;">محاسبه عملیات مجموعه‌ای</button>
+            <div id="sets-result" class="result-display" style="min-height: 100px;"></div>
+        </div>
+
+        <!-- Equation Solver -->
+        <div id="equation-calculator" class="calculator" style="display: none;">
+            <button class="menu-btn back-btn" onclick="showMainMenu()">🔙 بازگشت به منو</button>
+            <button class="menu-btn" onclick="toggleInfo('equation-info')">ℹ️ راهنمای معادلات</button>
+            
+            <div id="equation-info" class="info-panel">
+                <h3>📚 حل معادله:</h3>
+                <p>• معادله را به فرم x+2=5 وارد کنید</p>
+                <p>• ماشین حساب مقدار x را محاسبه می‌کند</p>
+                <p>• مثال‌ها:</p>
+                <p>  x+5=12 → x=7</p>
+                <p>  2*x=10 → x=5</p>
+                <p>  x^2=9 → x=3 یا x=-3</p>
+                <p>  sqrt(x)=4 → x=16</p>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">معادله (مثال: x+2=5)</label>
+                <input type="text" id="equation-input" class="calculator-display" placeholder="معادله را وارد کنید">
+            </div>
+            <button class="menu-btn" onclick="solveEquation()" style="width: 100%;">حل معادله</button>
+            <div id="equation-result" class="result-display" style="min-height: 200px;"></div>
+        </div>
+
+        <!-- Probability Tools -->
+        <div id="probability-calculator" class="calculator" style="display: none;">
+            <button class="menu-btn back-btn" onclick="showMainMenu()">🔙 بازگشت به منو</button>
+            <button class="menu-btn" onclick="toggleInfo('probability-info')">ℹ️ راهنمای احتمال</button>
+            
+            <div id="probability-info" class="info-panel">
+                <h3>📚 احتمال و ترکیبات:</h3>
+                <p>• تمام حالت‌های ممکن در پرتاب سکه</p>
+                <p>• برای n پرتاب سکه، 2^n حالت وجود دارد</p>
+                <p>• مثال برای 2 پرتاب:</p>
+                <p>  شیر-شیر</p>
+                <p>  شیر-خط</p>
+                <p>  خط-شیر</p>
+                <p>  خط-خط</p>
+                <p>• حداکثر 5 پرتاب قابل محاسبه است</p>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">تعداد پرتاب سکه (1 تا 5):</label>
+                <input type="number" id="probability-input" class="calculator-display" min="1" max="5" placeholder="عدد بین 1 تا 5 وارد کنید">
+            </div>
+            <button class="menu-btn" onclick="generateProbability()" style="width: 100%;">نمایش تمام حالت‌ها</button>
+            <div id="probability-result" class="result-display" style="min-height: 300px;"></div>
+        </div>
+
+        <!-- Function Plotter -->
+        <div id="graph-calculator" class="calculator" style="display: none;">
+            <button class="menu-btn back-btn" onclick="showMainMenu()">🔙 بازگشت به منو</button>
+            <button class="menu-btn" onclick="toggleInfo('graph-info')">ℹ️ راهنمای نمودار</button>
+            
+            <div id="graph-info" class="info-panel">
+                <h3>📚 رسم نمودار تابع:</h3>
+                <p>• تابع را برحسب x وارد کنید</p>
+                <p>• مثال‌ها:</p>
+                <p>  x^2 (سهمی)</p>
+                <p>  sin(x) (تابع سینوس)</p>
+                <p>  sqrt(x) (جذر x)</p>
+                <p>  abs(x) (مقدار مطلق)</p>
+                <p>  2*x+3 (خط راست)</p>
+                <p>• محدوده x از -10 تا 10 می‌باشد</p>
+            </div>
+            
+            <div style="margin-bottom: 1.5rem;">
+                <label style="display: block; margin-bottom: 0.5rem; font-weight: bold;">تابع y برحسب x (مثال: x^2):</label>
+                <input type="text" id="graph-input" class="calculator-display" placeholder="تابع را وارد کنید">
+            </div>
+            <button class="menu-btn" onclick="plotFunction()" style="width: 100%;">رسم نمودار</button>
+            <div id="graph"></div>
+        </div>
+    </div>
+
+    <footer class="footer">
+        <div class="copyright">© 2025 HRMP-MZM | All Rights Reserved</div>
+    </footer>
+
+    <script>
+        // نمایش منوی اصلی
+        function showMainMenu() {
+            document.querySelectorAll('.calculator').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById('main-menu').style.display = 'block';
+        }
+
+        // نمایش ماشین حساب مورد نظر
+        function showCalculator(type) {
+            document.getElementById('main-menu').style.display = 'none';
+            document.querySelectorAll('.calculator').forEach(el => {
+                el.style.display = 'none';
+            });
+            document.getElementById(`${type}-calculator`).style.display = 'block';
+        }
+
+        // نمایش/پنهان کردن اطلاعات
+        function toggleInfo(id) {
+            const info = document.getElementById(id);
+            info.style.display = info.style.display === 'none' ? 'block' : 'none';
+        }
+
+        // توابع ماشین حساب عددی
+        function appendToDisplay(value) {
+            const display = document.getElementById('basic-display');
+            display.value += value;
+        }
+
+        function clearDisplay() {
+            document.getElementById('basic-display').value = '';
+        }
+
+        function backspace() {
+            const display = document.getElementById('basic-display');
+            display.value = display.value.slice(0, -1);
+        }
+
+        function calculate() {
+            const display = document.getElementById('basic-display');
+            try {
+                let expr = display.value
+                    .replace(/\^/g, '^')
+                    .replace(/pi/g, 'pi')
+                    .replace(/e/g, 'e')
+                    .replace(/×/g, '*')
+                    .replace(/÷/g, '/');
+                
+                // جایگزینی برای توابع خاص
+                expr = expr.replace(/sqrt\(/g, 'sqrt(');
+                
+                // محاسبه با استفاده از math.js
+                const result = math.evaluate(expr);
+                display.value = result;
+            } catch (error) {
+                display.value = 'خطا در محاسبه';
+            }
+        }
+
+        // توابع عملیات مجموعه‌ای
+        function calculateSets() {
+            const setA = document.getElementById('set-a').value.split(',').map(x => x.trim()).filter(x => x !== '');
+            const setB = document.getElementById('set-b').value.split(',').map(x => x.trim()).filter(x => x !== '');
+            const operation = document.getElementById('set-operation').value;
+            const resultDiv = document.getElementById('sets-result');
+            
+            try {
+                const set1 = new Set(setA.map(Number));
+                const set2 = new Set(setB.map(Number));
+                let result;
+                
+                switch(operation) {
+                    case 'union':
+                        result = new Set([...set1, ...set2]);
+                        resultDiv.innerHTML = `
+                            <h3>نتیجه اتحاد:</h3>
+                            <p>A ∪ B = {${Array.from(result).join(', ')}}</p>
+                            <p>تعداد اعضا: ${result.size}</p>
+                        `;
+                        break;
+                    case 'intersection':
+                        result = new Set([...set1].filter(x => set2.has(x)));
+                        resultDiv.innerHTML = `
+                            <h3>نتیجه اشتراک:</h3>
+                            <p>A ∩ B = {${Array.from(result).join(', ') || '∅'}}</p>
+                            <p>تعداد اعضا: ${result.size}</p>
+                        `;
+                        break;
+                    case 'a-b':
+                        result = new Set([...set1].filter(x => !set2.has(x)));
+                        resultDiv.innerHTML = `
+                            <h3>نتیجه تفاضل:</h3>
+                            <p>A - B = {${Array.from(result).join(', ') || '∅'}}</p>
+                            <p>تعداد اعضا: ${result.size}</p>
+                        `;
+                        break;
+                    case 'b-a':
+                        result = new Set([...set2].filter(x => !set1.has(x)));
+                        resultDiv.innerHTML = `
+                            <h3>نتیجه تفاضل:</h3>
+                            <p>B - A = {${Array.from(result).join(', ') || '∅'}}</p>
+                            <p>تعداد اعضا: ${result.size}</p>
+                        `;
+                        break;
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">خطا در محاسبه</h3>
+                    <p>لطفاً اعداد را به درستی وارد کنید (مثال: 1,2,3)</p>
+                `;
+            }
+        }
+
+        // توابع حل معادله
+        function solveEquation() {
+            const equation = document.getElementById('equation-input').value;
+            const resultDiv = document.getElementById('equation-result');
+            
+            try {
+                const parts = equation.split('=');
+                if (parts.length !== 2) throw new Error('فرمت معادله نادرست. لطفاً معادله را به فرم x+2=5 وارد کنید');
+                
+                const lhs = parts[0].trim();
+                const rhs = parts[1].trim();
+                
+                // حل معادلات خطی
+                if (lhs.includes('x') && !rhs.includes('x')) {
+                    let expr = lhs.replace(/\^/g, '**');
+                    
+                    // حل معادلات درجه 2
+                    if (expr.includes('x**2') || expr.includes('x^2')) {
+                        // تبدیل به فرم استاندارد ax^2 + bx + c = 0
+                        const c = math.evaluate(rhs);
+                        expr = expr + '-' + c;
+                        
+                        // حل معادله درجه 2
+                        const solutions = solveQuadratic(expr);
+                        resultDiv.innerHTML = `
+                            <h3>معادله درجه دوم:</h3>
+                            <p>${lhs} = ${rhs}</p>
+                            <p>${expr} = 0</p>
+                            <h4>حل‌ها:</h4>
+                            <p>x₁ = ${solutions[0]}</p>
+                            <p>x₂ = ${solutions[1]}</p>
+                        `;
+                    } 
+                    // حل معادلات خطی ساده
+                    else {
+                        const value = math.evaluate(rhs + '-' + lhs.replace('x', '0'));
+                        const coeff = math.evaluate(lhs.replace('x', '1')) - math.evaluate(lhs.replace('x', '0'));
+                        const solution = value / coeff;
+                        
+                        resultDiv.innerHTML = `
+                            <h3>حل معادله خطی:</h3>
+                            <p>${lhs} = ${rhs}</p>
+                            <p>مراحل حل:</p>
+                            <p>1. ${lhs} - ${rhs} = 0</p>
+                            <p>2. ${(math.evaluate(lhs + '-' + rhs)).toString()} = 0</p>
+                            <p>3. x = ${solution}</p>
+                            <h4>نتیجه:</h4>
+                            <p>x = ${solution}</p>
+                        `;
+                    }
+                } else {
+                    throw new Error('فقط معادلات با یک متغیر x در سمت چپ پشتیبانی می‌شوند');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">خطا در حل معادله</h3>
+                    <p>${error.message}</p>
+                    <p>لطفاً معادله را به فرم صحیح وارد کنید، مثال‌ها:</p>
+                    <ul>
+                        <li>x+5=12</li>
+                        <li>2*x=10</li>
+                        <li>x^2=9</li>
+                    </ul>
+                `;
+            }
+        }
+
+        // حل معادله درجه 2
+        function solveQuadratic(expr) {
+            // استخراج ضرایب a, b, c از عبارت
+            const terms = expr.split(/(?=[+-])/);
+            let a = 0, b = 0, c = 0;
+            
+            terms.forEach(term => {
+                if (term.includes('x**2')) {
+                    a += math.evaluate(term.replace('x**2', '1'));
+                } else if (term.includes('x')) {
+                    b += math.evaluate(term.replace('x', '1'));
+                } else {
+                    c += math.evaluate(term);
+                }
+            });
+            
+            // محاسبه دلتا
+            const delta = b**2 - 4*a*c;
+            
+            if (delta < 0) {
+                const realPart = -b / (2*a);
+                const imagPart = math.sqrt(-delta) / (2*a);
+                return [
+                    `${realPart.toFixed(2)} + ${imagPart.toFixed(2)}i`,
+                    `${realPart.toFixed(2)} - ${imagPart.toFixed(2)}i`
+                ];
+            } else {
+                const x1 = (-b + math.sqrt(delta)) / (2*a);
+                const x2 = (-b - math.sqrt(delta)) / (2*a);
+                return [x1.toFixed(4), x2.toFixed(4)];
+            }
+        }
+
+        // توابع احتمال
+        function generateProbability() {
+            const n = parseInt(document.getElementById('probability-input').value);
+            const resultDiv = document.getElementById('probability-result');
+            
+            if (n < 1 || n > 5) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">خطا در ورودی</h3>
+                    <p>لطفاً عددی بین 1 تا 5 وارد کنید</p>
+                `;
+                return;
+            }
+            
+            const outcomes = ['شیر', 'خط'];
+            const allCombinations = cartesianProduct(outcomes, n);
+            
+            let resultHTML = `
+                <h3>تمام حالت‌های ممکن برای ${n} پرتاب سکه:</h3>
+                <p>تعداد کل حالت‌ها: ${allCombinations.length} (2^${n} = ${Math.pow(2, n)})</p>
+                <div style="column-count: ${n > 3 ? 2 : 1}; column-gap: 2rem;">
+            `;
+            
+            allCombinations.forEach((comb, index) => {
+                resultHTML += `
+                    <div style="margin-bottom: 0.5rem; break-inside: avoid;">
+                        <span style="color: var(--accent-color);">${index+1}.</span> ${comb.join(' - ')}
+                    </div>
+                `;
+            });
+            
+            resultHTML += `</div>`;
+            resultDiv.innerHTML = resultHTML;
+        }
+
+        function cartesianProduct(arr, n) {
+            let result = [];
+            const generate = (current, depth) => {
+                if (depth === n) {
+                    result.push([...current]);
+                    return;
+                }
+                for (let item of arr) {
+                    current[depth] = item;
+                    generate(current, depth + 1);
+                }
+            };
+            generate([], 0);
+            return result;
+        }
+
+        // توابع رسم نمودار
+        function plotFunction() {
+            const funcStr = document.getElementById('graph-input').value;
+            const graphDiv = document.getElementById('graph');
+            
+            try {
+                // ایجاد آرایه‌ای از مقادیر x
+                const xValues = [];
+                const step = 0.2;
+                for (let x = -10; x <= 10; x += step) {
+                    xValues.push(x);
+                }
+                
+                // محاسبه مقادیر y
+                const yValues = xValues.map(x => {
+                    try {
+                        const expr = funcStr
+                            .replace(/x/g, `(${x})`)
+                            .replace(/\^/g, '**')
+                            .replace(/sin/g, 'math.sin')
+                            .replace(/cos/g, 'math.cos')
+                            .replace(/tan/g, 'math.tan')
+                            .replace(/sqrt/g, 'math.sqrt')
+                            .replace(/abs/g, 'math.abs')
+                            .replace(/log/g, 'math.log')
+                            .replace(/exp/g, 'math.exp');
+                        return math.evaluate(expr);
+                    } catch {
+                        return NaN;
+                    }
+                });
+                
+                // رسم نمودار با Plotly
+                const trace = {
+                    x: xValues,
+                    y: yValues,
+                    type: 'scatter',
+                    mode: 'lines',
+                    line: {color: '#3D7A7A', width: 3},
+                    name: 'y = ' + funcStr
+                };
+                
+                const layout = {
+                    title: {
+                        text: 'نمودار تابع y = ' + funcStr,
+                        font: {family: 'Vazirmatn', size: 16}
+                    },
+                    xaxis: {
+                        title: {text: 'محور x', font: {family: 'Vazirmatn'}},
+                        gridcolor: '#E0F2F2',
+                        zerolinecolor: '#8FB9B9'
+                    },
+                    yaxis: {
+                        title: {text: 'محور y', font: {family: 'Vazirmatn'}},
+                        gridcolor: '#E0F2F2',
+                        zerolinecolor: '#8FB9B9'
+                    },
+                    plot_bgcolor: 'white',
+                    paper_bgcolor: 'white',
+                    font: {family: 'Vazirmatn'}
+                };
+                
+                Plotly.newPlot(graphDiv, [trace], layout);
+            } catch (error) {
+                graphDiv.innerHTML = `
+                    <div style="padding: 2rem; text-align: center; color: red;">
+                        <h3>خطا در رسم نمودار</h3>
+                        <p>${error.message}</p>
+                        <p>لطفاً تابع را به فرم صحیح وارد کنید، مثال‌ها:</p>
+                        <ul style="text-align: right; direction: rtl;">
+                            <li>x^2</li>
+                            <li>sin(x)</li>
+                            <li>2*x + 3</li>
+                            <li>sqrt(x)</li>
+                        </ul>
+                    </div>
+                `;
+            }
+        }
+    </script>
+</body>
+</html>
