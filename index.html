@@ -243,7 +243,6 @@
             }
         }
     </style>
-    <link rel="stylesheet" href="responsive.css">
 </head>
 <body>
     <header class="header">
@@ -551,71 +550,70 @@
 
         // توابع حل معادله
         function solveEquation() {
-    const equation = document.getElementById('equation-input').value;
-    const resultDiv = document.getElementById('equation-result');
-
-    try {
-        const parts = equation.split('=');
-        if (parts.length !== 2) throw new Error('فرمت معادله نادرست. لطفاً معادله را به فرم x+2=5 وارد کنید');
-
-        const lhs = parts[0].trim().replace(/\^/g, '**');
-        const rhs = parts[1].trim().replace(/\^/g, '**');
-
-        // تابع ناشناخته math.js نیاز دارد همه توابع با "math." شروع شوند
-        const preprocess = (expr) => expr
-            .replace(/sqrt/g, 'math.sqrt')
-            .replace(/sin/g, 'math.sin')
-            .replace(/cos/g, 'math.cos')
-            .replace(/tan/g, 'math.tan')
-            .replace(/log/g, 'math.log')
-            .replace(/abs/g, 'math.abs')
-            .replace(/exp/g, 'math.exp')
-            .replace(/pi/g, 'math.pi')
-            .replace(/e/g, 'math.e');
-
-        const processedLHS = preprocess(lhs);
-        const processedRHS = preprocess(rhs);
-
-        const expr = `(${processedLHS}) - (${processedRHS})`;
-
-        // تعریف x
-        const x = math.symbolic ? math.symbolic('x') : 'x';
-
-        // استفاده از math.js simplify و solve
-        const simplified = math.simplify(expr);
-        const solution = math.solve(expr, 'x');
-
-        if (solution && solution.length > 0) {
-            let solHTML = `
-                <h3>حل معادله:</h3>
-                <p>${lhs} = ${rhs}</p>
-                <h4>نتیجه:</h4>
-            `;
-            solution.forEach((sol, i) => {
-                solHTML += `<p>x${solution.length > 1 ? `_${i + 1}` : ''} = ${sol}</p>`;
-            });
-            resultDiv.innerHTML = solHTML;
-        } else {
-            resultDiv.innerHTML = `
-                <h3 style="color:red;">نتیجه‌ای پیدا نشد</h3>
-                <p>لطفاً معادله ساده‌تر یا دقیق‌تری وارد کنید</p>
-            `;
+            const equation = document.getElementById('equation-input').value;
+            const resultDiv = document.getElementById('equation-result');
+            
+            try {
+                const parts = equation.split('=');
+                if (parts.length !== 2) throw new Error('فرمت معادله نادرست. لطفاً معادله را به فرم x+2=5 وارد کنید');
+                
+                const lhs = parts[0].trim();
+                const rhs = parts[1].trim();
+                
+                // حل معادلات خطی
+                if (lhs.includes('x') && !rhs.includes('x')) {
+                    let expr = lhs.replace(/\^/g, '**');
+                    
+                    // حل معادلات درجه 2
+                    if (expr.includes('x**2') || expr.includes('x^2')) {
+                        // تبدیل به فرم استاندارد ax^2 + bx + c = 0
+                        const c = math.evaluate(rhs);
+                        expr = expr + '-' + c;
+                        
+                        // حل معادله درجه 2
+                        const solutions = solveQuadratic(expr);
+                        resultDiv.innerHTML = `
+                            <h3>معادله درجه دوم:</h3>
+                            <p>${lhs} = ${rhs}</p>
+                            <p>${expr} = 0</p>
+                            <h4>حل‌ها:</h4>
+                            <p>x₁ = ${solutions[0]}</p>
+                            <p>x₂ = ${solutions[1]}</p>
+                        `;
+                    } 
+                    // حل معادلات خطی ساده
+                    else {
+                        const value = math.evaluate(rhs + '-' + lhs.replace('x', '0'));
+                        const coeff = math.evaluate(lhs.replace('x', '1')) - math.evaluate(lhs.replace('x', '0'));
+                        const solution = value / coeff;
+                        
+                        resultDiv.innerHTML = `
+                            <h3>حل معادله خطی:</h3>
+                            <p>${lhs} = ${rhs}</p>
+                            <p>مراحل حل:</p>
+                            <p>1. ${lhs} - ${rhs} = 0</p>
+                            <p>2. ${(math.evaluate(lhs + '-' + rhs)).toString()} = 0</p>
+                            <p>3. x = ${solution}</p>
+                            <h4>نتیجه:</h4>
+                            <p>x = ${solution}</p>
+                        `;
+                    }
+                } else {
+                    throw new Error('فقط معادلات با یک متغیر x در سمت چپ پشتیبانی می‌شوند');
+                }
+            } catch (error) {
+                resultDiv.innerHTML = `
+                    <h3 style="color: red;">خطا در حل معادله</h3>
+                    <p>${error.message}</p>
+                    <p>لطفاً معادله را به فرم صحیح وارد کنید، مثال‌ها:</p>
+                    <ul>
+                        <li>x+5=12</li>
+                        <li>2*x=10</li>
+                        <li>x^2=9</li>
+                    </ul>
+                `;
+            }
         }
-
-    } catch (error) {
-        resultDiv.innerHTML = `
-            <h3 style="color: red;">خطا در حل معادله</h3>
-            <p>${error.message}</p>
-            <p>فرمت صحیح معادله مانند:</p>
-            <ul>
-                <li>x+5=12</li>
-                <li>x^2=9</li>
-                <li>sqrt(x)=4</li>
-            </ul>
-        `;
-    }
-}
-
 
         // حل معادله درجه 2
         function solveQuadratic(expr) {
