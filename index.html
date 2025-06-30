@@ -243,6 +243,7 @@
             }
         }
     </style>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/mathjs/11.10.0/math.min.js"></script>
 </head>
 <body>
     <header class="header">
@@ -475,24 +476,22 @@
 
         function calculate() {
             const display = document.getElementById('basic-display');
-            try {
-                let expr = display.value
-                    .replace(/\^/g, '^')
-                    .replace(/pi/g, 'pi')
-                    .replace(/e/g, 'e')
-                    .replace(/×/g, '*')
-                    .replace(/÷/g, '/');
-                
-                // جایگزینی برای توابع خاص
-                expr = expr.replace(/sqrt\(/g, 'sqrt(');
-                
-                // محاسبه با استفاده از math.js
-                const result = math.evaluate(expr);
-                display.value = result;
-            } catch (error) {
-                display.value = 'خطا در محاسبه';
-            }
+        try {
+            let expr = display.value
+                .replace(/\^/g, '**')  // جایگزینی ^ با **
+                .replace(/×/g, '*')    // جایگزینی × با *
+                .replace(/÷/g, '/')    // جایگزینی ÷ با /
+                .replace(/pi/g, 'pi')  // جایگزینی pi با pi
+                .replace(/e/g, 'e');   // جایگزینی e با e
+
+        // محاسبه با استفاده از math.js
+            const result = math.evaluate(expr);
+            display.value = result;
+        } catch (error) {
+            display.value = 'خطا در محاسبه';
         }
+    }
+
 
         // توابع عملیات مجموعه‌ای
         function calculateSets() {
